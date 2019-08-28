@@ -12,16 +12,16 @@ pd.set_option('max_colwidth', 150)
 
 URL = 'https://gestion.ehu.es/WebUntis/api/public/timetable/weekly/data?elementType=1&elementId=5847&date=2019-10-07&formatId=64&filter.departmentId=238'
 HEADERS = {
-    'Sec-Fetch-Mode': 'cors' ,
-    'Sec-Fetch-Site': 'same-origin' ,
-    'DNT': '1' ,
-    'Accept-Encoding': 'gzip, deflate, br' ,
-    'Accept-Language': 'en-US,en;q=0.9,es;q=0.8' ,
-    'User-Agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3872.0 Mobile Safari/537.36',
+    # 'Sec-Fetch-Mode': 'cors' ,
+    # 'Sec-Fetch-Site': 'same-origin' ,
+    # 'DNT': '1' ,
+    # 'Accept-Encoding': 'gzip, deflate, br' ,
+    # 'Accept-Language': 'en-US,en;q=0.9,es;q=0.8' ,
+    # 'Connection': 'keep-alive'
     'Accept': 'application/json',
-    'Referer': 'https://gestion.ehu.es/WebUntis/?school=ehu',
     'Cookie': 'schoolname="_ZWh1"; schoolname="_ZWh1"; JSESSIONID=851928A91F077D9F60EDA49243EDD9FB; ObGAURCookie=blEjfmYSeSPz4hqbjzhjEujaYNstepBrudLz9PQjfw4=',
-    'Connection': 'keep-alive'
+    'Referer': 'https://gestion.ehu.es/WebUntis/?school=ehu',
+    'User-Agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3872.0 Mobile Safari/537.36'
 }
 
 resp = requests.get(URL, headers=HEADERS)

@@ -11,16 +11,10 @@ TOKEN = ""
 MY_ID = 150853329
 
 HEADERS = {
-    'Sec-Fetch-Mode': 'cors' ,
-    'Sec-Fetch-Site': 'same-origin' ,
-    'DNT': '1' ,
-    'Accept-Encoding': 'gzip, deflate, br' ,
-    'Accept-Language': 'en-US,en;q=0.9,es;q=0.8' ,
-    'User-Agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3872.0 Mobile Safari/537.36',
     'Accept': 'application/json',
+    'Cookie': 'schoolname="_ZWh1"; schoolname="_ZWh1"; JSESSIONID=851928A91F077D9F60EDA49243EDD9FB; ObGAURCookie=blEjfmYSeSPz4hqbjzhjEujaYNstepBrudLz9PQjfw4='
     'Referer': 'https://gestion.ehu.es/WebUntis/?school=ehu',
-    'Cookie': 'schoolname="_ZWh1"; schoolname="_ZWh1"; JSESSIONID=851928A91F077D9F60EDA49243EDD9FB; ObGAURCookie=blEjfmYSeSPz4hqbjzhjEujaYNstepBrudLz9PQjfw4=',
-    'Connection': 'keep-alive'
+    'User-Agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3872.0 Mobile Safari/537.36',
 }
 
 commands = {  
@@ -28,6 +22,18 @@ commands = {
               'thisWeek': 'Gets the schedule of this week.',
               'nextWeek': 'Gets the schedule of the next week.',
               'help': 'Shows info about the available commands'
+}
+
+courses = {
+    '306-1º-01 Master Teleco': '5883',
+    '306-1º-02 Master Teleco': '5903',
+    '306-1º-31 Master Teleco': '5885',
+    '306-1º-61 Master Teleco': '5889',
+    
+    '306-1º-01 Master Teleco': '5847',
+    '306-1º-31 Master Teleco': '5849',
+    '306-2º-16 Master Teleco': '5851',
+    '306-2º-46 Master Teleco': '5853',
 }
 
 bot = telebot.TeleBot(TOKEN)
