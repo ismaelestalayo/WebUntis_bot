@@ -7,7 +7,7 @@ from datetime import date
 
 # Author: Ismael Estalayo
 
-TOKEN = ""
+TOKEN = "934386303:AAErW9EI_xvYxBmwqNwzE_2LtzFaJKP0Dzc"
 MY_ID = 150853329
 
 HEADERS = {
