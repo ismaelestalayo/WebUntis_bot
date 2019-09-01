@@ -3,7 +3,6 @@ import json
 import requests
 import pandas as pd
 
-from bs4 import BeautifulSoup
 from datetime import date, datetime, timedelta
 
 pd.set_option("display.max_rows", 30)
