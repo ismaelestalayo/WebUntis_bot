@@ -3,7 +3,7 @@ import requests
 import pandas as pd
 import json
 
-from datetime import date
+from datetime import date, timedelta
 
 # Author: Ismael Estalayo
 
@@ -20,8 +20,7 @@ HEADERS = {
 commands = {  
               'start': 'First things first',
               'thisWeek': 'Gets the schedule of this week.',
-              'nextWeek': 'Gets the schedule of the next week.',
-              'help': 'Shows info about the available commands'
+              'nextWeek': 'Gets the schedule of the next week.'
 }
 
 courses = {
@@ -72,9 +71,8 @@ def createSchedule(endpoint, verbose=False):
         df = pd.DataFrame( elementPeriods[elementId] )
         df = df.sort_values(by=['date', 'startTime'])
         
-        schedule = ""
         for i, group in df.groupby(['date']):
-            schedule += ("\n--------------------------------------------\n")
+            schedule = ("\n--------------------------------------------\n")
             schedule += "%s-%s-%s \n" % (str(i)[0:4], str(i)[4:6], str(i)[6:8])
             
             for j, row in group.groupby(['lessonId']):
@@ -88,12 +86,12 @@ def createSchedule(endpoint, verbose=False):
                 if verbose:
                     schedule += ("      " + line1 + '\n')
                 schedule += ("      " + line2 + '\n')
-        return schedule
-        
+    except KeyError as ex:
+        schedule = 'I could not find any classes for that week.'
     except Exception as ex:
-        error = 'Error: \n' + ex + '\n\n'
-        error += 'Oopsie Woopsie! Something went wrong...'
-
+        schedule = 'Oopsie Woopsie! Something went wrong...\n'
+        schedule += 'Error: %s' % ex
+    return schedule
 
 # ############################################################################
 def main():
@@ -121,22 +119,30 @@ def main():
 
 
     # ############################################################################
-    @bot.message_handler(commands=['thisWeek'])
-    def command_palette(m):
+    @bot.message_handler(commands=['thisweek'])
+    def command_thisweek(m):
         cid = m.chat.id
 
         week = date.today().strftime('%Y-%m-%d')
-        endpoint = createURL()
+        endpoint = createURL(week=week)
         schedule = createSchedule(endpoint)
 
         bot.send_message(cid, schedule)
 
-    @bot.message_handler(commands=['nextWeek'])
-    def command_palette(m):
+    @bot.message_handler(commands=['nextweek'])
+    def command_nextweek(m):
         cid = m.chat.id
 
-        bot.send_message(cid, 'ooopsie wooopsies')
+        week = (date.today() + timedelta(7)).strftime('%Y-%m-%d')
+        endpoint = createURL(week=week)
+        schedule = createSchedule(endpoint)
 
+        bot.send_message(cid, schedule)
+    
+    @bot.message_handler()
+    def command_404(m):
+        print("Ooopsie woopsies, that command does not exist!")
+        
     bot.polling()
 
     
