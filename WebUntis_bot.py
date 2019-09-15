@@ -19,8 +19,8 @@ HEADERS = {
 
 commands = {  
               'start': 'First things first',
-              'thisWeek': 'Gets the schedule of this week.',
-              'nextWeek': 'Gets the schedule of the next week.'
+              'thisweek': 'Gets the schedule of this week.',
+              'nextweek': 'Gets the schedule of the next week.'
 }
 
 courses = {
@@ -57,7 +57,46 @@ def createURL(elementID=5847, week='2019-10-07', formatId=64, departmentId=238):
     return URL
 
 
-def createSchedule(endpoint, verbose=False):
+def createDaySchedule(endpoint, day=date.today(), verbose=False):
+    resp = requests.get(endpoint, headers=HEADERS)
+    raw = json.loads(resp.content)
+    data = raw['data']['result']['data']
+    
+    try:
+        elements = data['elements']
+        elementIds = data['elementIds']
+        elementId = str(data['elementIds'][0])
+        elementPeriods = data['elementPeriods']
+
+        df = pd.DataFrame( elementPeriods[elementId] )
+        df = df.sort_values(by=['date', 'startTime'])
+        
+        i = day.strftime('%Y%m%d')
+        group = df.query('date==@i')
+        
+        schedule = ("\n--------------------------------------------\n")
+        schedule += "%s-%s-%s \n" % (str(i)[0:4], str(i)[4:6], str(i)[6:8])
+        
+        for j, row in group.groupby(['lessonId']):
+            start = "%.4d" % row.iloc[0]['startTime']
+            end = "%.4d" % row.iloc[-1]['endTime']
+            schedule += "    🕐%s:%s - %s:%s \n" % (start[:2], start[2:], end[:2], end[2:]) 
+            classIds = [elem['id'] for elem in row['elements'].iloc[0]]
+            line1 = list(filter(lambda elem: elem['id'] == classIds[0], elements))[0]['name'] + " - "
+            line2 = list(filter(lambda elem: elem['id'] == classIds[1], elements))[0]['longName']
+            line1 += list(filter(lambda elem: elem['id'] == classIds[2], elements))[0]['name']
+            if verbose:
+                schedule += ("      " + line1 + '\n')
+            schedule += ("      " + line2 + '\n')
+    except KeyError as ex:
+        schedule = 'I could not find any classes for that day.'
+    except Exception as ex:
+        schedule = 'Oopsie Woopsie! Something went wrong...\n'
+        schedule += 'Error: %s' % ex
+    return schedule
+
+
+def createWeekSchedule(endpoint, verbose=False):
     resp = requests.get(endpoint, headers=HEADERS)
     raw = json.loads(resp.content)
     data = raw['data']['result']['data']
@@ -119,13 +158,35 @@ def main():
 
 
     # ############################################################################
+    @bot.message_handler(commands=['today'])
+    def command_today(m):
+        cid = m.chat.id
+
+        week = date.today().strftime('%Y-%m-%d')
+        endpoint = createURL(week=week)
+        day = date.today()
+        schedule = createDaySchedule(endpoint, day)
+
+        bot.send_message(cid, schedule)
+    
+    @bot.message_handler(commands=['tomorrow'])
+    def command_tomorrow(m):
+        cid = m.chat.id
+
+        week = date.today().strftime('%Y-%m-%d')
+        endpoint = createURL(week=week)
+        day = date.today() + timedelta(1)
+        schedule = createDaySchedule(endpoint, day)
+
+        bot.send_message(cid, schedule)
+    
     @bot.message_handler(commands=['thisweek'])
     def command_thisweek(m):
         cid = m.chat.id
 
         week = date.today().strftime('%Y-%m-%d')
         endpoint = createURL(week=week)
-        schedule = createSchedule(endpoint)
+        schedule = createWeekSchedule(endpoint)
 
         bot.send_message(cid, schedule)
 
@@ -135,7 +196,7 @@ def main():
 
         week = (date.today() + timedelta(7)).strftime('%Y-%m-%d')
         endpoint = createURL(week=week)
-        schedule = createSchedule(endpoint)
+        schedule = createWeekSchedule(endpoint)
 
         bot.send_message(cid, schedule)
     

@@ -36,7 +36,8 @@ df = pd.DataFrame( elementPeriods[elementId] )
 df.drop(columns=['lessonCode', 'periodText', 'hasPeriodText', 'hasInfo', 'priority', 'roomCapacity', 'studentCount'], inplace=True)
 df = df.sort_values(by=['date', 'startTime'])
 
-
+date = date.today().strftime('%Y%m%d')
+df.query('date==@today')
 
 for i, group in df.groupby(['date']):
     print("\n-----------------------------------------------------------------------------------")
