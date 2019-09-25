@@ -7,7 +7,7 @@ from datetime import date, timedelta
 
 # Author: Ismael Estalayo
 
-TOKEN = ""
+TOKEN = open('token.txt', 'r').read()
 MY_ID = 150853329
 
 HEADERS = {
