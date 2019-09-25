@@ -37,7 +37,7 @@ courses = {
 
 bot = telebot.TeleBot(TOKEN)
 
-#Outputs the incoming messages in the console
+# Outputs the incoming messages in the console
 def listener(messages):
     for m in messages:
         if (m.content_type == 'text') and m.chat.first_name:
@@ -46,6 +46,7 @@ def listener(messages):
 
             if(m.chat.id != MY_ID):
             	bot.send_message(MY_ID, "[" + m.chat.first_name + "]: " + m.text)
+
 
 # by default gets schedule for my university
 def createURL(elementID=5847, week='2019-10-07', formatId=64, departmentId=238):
@@ -106,33 +107,37 @@ def createWeekSchedule(endpoint, verbose=False):
         elementIds = data['elementIds']
         elementId = str(data['elementIds'][0])
         elementPeriods = data['elementPeriods']
-
-        df = pd.DataFrame( elementPeriods[elementId] )
-        df = df.sort_values(by=['date', 'startTime'])
         
+        df = pd.DataFrame(elementPeriods[elementId])
+        df = df.sort_values(by=['date', 'startTime'])
+        schedule = ""
         for i, group in df.groupby(['date']):
-            schedule = ("\n--------------------------------------------\n")
+            schedule += ("\n--------------------------------------------\n")
             schedule += "%s-%s-%s \n" % (str(i)[0:4], str(i)[4:6], str(i)[6:8])
             
             for j, row in group.groupby(['lessonId']):
                 start = "%.4d" % row.iloc[0]['startTime']
                 end = "%.4d" % row.iloc[-1]['endTime']
-                schedule += "    🕐%s:%s - %s:%s \n" % (start[:2], start[2:], end[:2], end[2:]) 
+                schedule += "    🕐%s:%s - %s:%s \n" % (
+                    start[:2], start[2:], end[:2], end[2:])
                 classIds = [elem['id'] for elem in row['elements'].iloc[0]]
-                line1 = list(filter(lambda elem: elem['id'] == classIds[0], elements))[0]['name'] + " - "
-                line2 = list(filter(lambda elem: elem['id'] == classIds[1], elements))[0]['longName']
-                line1 += list(filter(lambda elem: elem['id'] == classIds[2], elements))[0]['name']
+                line1 = list(filter(lambda elem: elem['id'] == classIds[0],
+                                    elements))[0]['name'] + " - "
+                line2 = list(filter(lambda elem: elem['id'] == classIds[1],
+                                    elements))[0]['longName']
+                line1 += list(filter(lambda elem: elem['id'] == classIds[2],
+                                     elements))[0]['name']
                 if verbose:
                     schedule += ("      " + line1 + '\n')
                 schedule += ("      " + line2 + '\n')
-    except KeyError as ex:
+    except KeyError:
         schedule = 'I could not find any classes for that week.'
     except Exception as ex:
         schedule = 'Oopsie Woopsie! Something went wrong...\n'
         schedule += 'Error: %s' % ex
     return schedule
 
-# ############################################################################
+# #############################################################################
 def main():
     bot = telebot.TeleBot(TOKEN)
     bot.set_update_listener(listener)  # register listener
@@ -157,7 +162,7 @@ def main():
         bot.send_message(cid, help_text)
 
 
-    # ############################################################################
+    # #########################################################################
     @bot.message_handler(commands=['today'])
     def command_today(m):
         cid = m.chat.id
