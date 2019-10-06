@@ -59,6 +59,7 @@ def createURL(elementID=5847, week='2019-10-07', formatId=64, departmentId=238):
 
 
 def createDaySchedule(endpoint, day=date.today(), verbose=False):
+    schedule = ""
     resp = requests.get(endpoint, headers=HEADERS)
     raw = json.loads(resp.content)
     data = raw['data']['result']['data']
@@ -68,7 +69,6 @@ def createDaySchedule(endpoint, day=date.today(), verbose=False):
         elementIds = data['elementIds']
         elementId = str(data['elementIds'][0])
         elementPeriods = data['elementPeriods']
-
         df = pd.DataFrame( elementPeriods[elementId] )
         df = df.sort_values(by=['date', 'startTime'])
         
@@ -98,6 +98,7 @@ def createDaySchedule(endpoint, day=date.today(), verbose=False):
 
 
 def createWeekSchedule(endpoint, verbose=False):
+    schedule = ""
     resp = requests.get(endpoint, headers=HEADERS)
     raw = json.loads(resp.content)
     data = raw['data']['result']['data']
@@ -109,17 +110,24 @@ def createWeekSchedule(endpoint, verbose=False):
         elementPeriods = data['elementPeriods']
         
         df = pd.DataFrame(elementPeriods[elementId])
+        day = date.today()
+        df = df[ df['date'] >= int(day.strftime('%Y%m%d')) ]
         df = df.sort_values(by=['date', 'startTime'])
-        schedule = ""
+        if df.empty:
+            raise TypeError
         for i, group in df.groupby(['date']):
+            year, month, day = str(i)[0:4], str(i)[4:6], str(i)[6:8]
+            weekDay = date(int(year), int(month), int(day)).strftime('%A')
             schedule += ("\n--------------------------------------------\n")
-            schedule += "%s-%s-%s \n" % (str(i)[0:4], str(i)[4:6], str(i)[6:8])
+            schedule += "%s-%s-%s (%s)\n" % (year, month, day, weekDay)
             
-            for j, row in group.groupby(['lessonId']):
+            for j, row in group.groupby(['lessonId'], sort=False):
                 start = "%.4d" % row.iloc[0]['startTime']
                 end = "%.4d" % row.iloc[-1]['endTime']
-                schedule += "    🕐%s:%s - %s:%s \n" % (
-                    start[:2], start[2:], end[:2], end[2:])
+                classType = row.iloc[0]['lessonText']
+                
+                schedule += "    🕐 %s:%s - %s:%s (%s)\n" % (
+                    start[:2], start[2:], end[:2], end[2:], classType)
                 classIds = [elem['id'] for elem in row['elements'].iloc[0]]
                 line1 = list(filter(lambda elem: elem['id'] == classIds[0],
                                     elements))[0]['name'] + " - "
@@ -132,6 +140,8 @@ def createWeekSchedule(endpoint, verbose=False):
                 schedule += ("      " + line2 + '\n')
     except KeyError:
         schedule = 'I could not find any classes for that week.'
+    except TypeError:
+        schedule = 'I could not find any future classes for that week.'
     except Exception as ex:
         schedule = 'Oopsie Woopsie! Something went wrong...\n'
         schedule += 'Error: %s' % ex
@@ -205,9 +215,22 @@ def main():
 
         bot.send_message(cid, schedule)
     
+    @bot.message_handler(commands=['nextnextweek'])
+    def command_nextnextweek(m):
+        cid = m.chat.id
+
+        week = (date.today() + timedelta(14)).strftime('%Y-%m-%d')
+        endpoint = createURL(week=week)
+        schedule = createWeekSchedule(endpoint)
+
+        bot.send_message(cid, schedule)
+    
     @bot.message_handler()
     def command_404(m):
-        print("Ooopsie woopsies, that command does not exist!")
+        cid = m.chat.id
+        
+        message = "Ooopsie woopsies, that command does not exist!"
+        bot.send_message(cid, message)
         
     bot.polling()
 
