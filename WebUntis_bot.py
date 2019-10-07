@@ -8,8 +8,13 @@ from datetime import date, timedelta
 
 # Author: Ismael Estalayo
 
-with open('token.txt', 'r') as f:
-    TOKEN = f.read()
+try:
+    with open('token.txt', 'r') as f:
+        TOKEN = f.read()
+    with open('users.txt', 'r') as f:
+        USERS = json.load(f)
+except Exception as ex:
+    print("> Error reading token.txt or users.txt file \n", ex)
 MY_ID = 150853329
 
 HEADERS = {
@@ -183,47 +188,72 @@ def main():
     @bot.message_handler(commands=['today'])
     def command_today(m):
         cid = m.chat.id
-        week = date.today().strftime('%Y-%m-%d')
-        endpoint = createURL(elementID=course, week=week)
-        day = date.today()
-        message = createDaySchedule(endpoint, day)
+        course = USERS.get(str(cid), 0)
+        if course != 0:
+            course = course['course']
+            week = date.today().strftime('%Y-%m-%d')
+            endpoint = createURL(elementID=course, week=week)
+            day = date.today()
+            message = createDaySchedule(endpoint, day)
+        else:
+            message = "You haven't configured a course yet..."
         
         bot.send_message(cid, message)
     
     @bot.message_handler(commands=['tomorrow'])
     def command_tomorrow(m):
         cid = m.chat.id
-        week = date.today().strftime('%Y-%m-%d')
-        endpoint = createURL(week=week)
-        day = date.today() + timedelta(1)
-        message = createDaySchedule(endpoint, day)
+        course = USERS.get(str(cid), 0)
+        if course != 0:
+            course = course['course']
+            week = date.today().strftime('%Y-%m-%d')
+            endpoint = createURL(week=week)
+            day = date.today() + timedelta(1)
+            message = createDaySchedule(endpoint, day)
+        else:
+            message = "You haven't configured a course yet..."
         
         bot.send_message(cid, message)
     
     @bot.message_handler(commands=['thisweek'])
     def command_thisweek(m):
         cid = m.chat.id
-        week = date.today().strftime('%Y-%m-%d')
-        endpoint = createURL(week=week)
-        message = createWeekSchedule(endpoint)
+        course = USERS.get(str(cid), 0)
+        if course != 0:
+            course = course['course']
+            week = date.today().strftime('%Y-%m-%d')
+            endpoint = createURL(week=week)
+            message = createWeekSchedule(endpoint)
+        else:
+            message = "You haven't configured a course yet..."
         
         bot.send_message(cid, message)
 
     @bot.message_handler(commands=['nextweek'])
     def command_nextweek(m):
         cid = m.chat.id
-        week = (date.today() + timedelta(7)).strftime('%Y-%m-%d')
-        endpoint = createURL(week=week)
-        message = createWeekSchedule(endpoint)
+        course = USERS.get(str(cid), 0)
+        if course != 0:
+            course = course['course']
+            week = (date.today() + timedelta(7)).strftime('%Y-%m-%d')
+            endpoint = createURL(week=week)
+            message = createWeekSchedule(endpoint)
+        else:
+            message = "You haven't configured a course yet..."
         
         bot.send_message(cid, message)
     
     @bot.message_handler(commands=['nextnextweek'])
     def command_nextnextweek(m):
         cid = m.chat.id
-        course = course[0]
-        week = (date.today() + timedelta(14)).strftime('%Y-%m-%d')
-        endpoint = createURL(week=week)
+        course = USERS.get(str(cid), 0)
+        if course != 0:
+            course = course['course']
+            week = (date.today() + timedelta(14)).strftime('%Y-%m-%d')
+            endpoint = createURL(week=week)
+            message = createWeekSchedule(endpoint)
+        else:
+            message = "You haven't configured a course yet..."
         bot.send_message(cid, message)
     
     @bot.message_handler(commands=['config'])
@@ -232,7 +262,12 @@ def main():
         
         try:
             course = int(m.text.split(" ")[1])
-            message = "TBD"
+            USERS[cid] = {'course': course, 'name': m.chat.first_name}
+            file_object = open('users.txt', 'w')
+            json.dump(USERS, file_object)
+            log = 'new user %s configured on %s' % (m.chat.first_name, course)
+            bot.send_message(MY_ID, log)
+            message = "Updated your course!"
         except IndexError: 
             message = "You did not indicate your course id. Usage\n"
             message += "/config XXXX (where XXXX is the id of the course) \n"
@@ -260,11 +295,10 @@ try:
     main()
 
 except KeyboardInterrupt:
-    print("Exiting by Ctrl-C request...")
-    
-
-    
-
-
-
-
+    print("> Exiting by Ctrl-C request...")
+except ConnectionError:
+    print("YIEE1")
+except requests.exceptions.ConnectionError:
+    print("> Error on the internet connection")
+except Exception as ex:
+    print("> Not caught exception! \n", ex)
