@@ -18,7 +18,7 @@ except Exception as ex:
 
 MY_ID = 150853329
 
-DAYS = ['NULL', 'Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sabado', 'Domingo']
+DAYS = ['Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sabado', 'Domingo']
 MONTHS = ['NULL', 'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct',
          'Nov', 'Dic']
 
@@ -215,7 +215,7 @@ def main():
         if course != 0:
             course = course['course']
             week = date.today().strftime('%Y-%m-%d')
-            endpoint = createURL(week=week)
+            endpoint = createURL(elementID=course, week=week)
             day = date.today() + timedelta(1)
             message = createDaySchedule(endpoint, day)
         else:
@@ -230,7 +230,7 @@ def main():
         if course != 0:
             course = course['course']
             week = date.today().strftime('%Y-%m-%d')
-            endpoint = createURL(week=week)
+            endpoint = createURL(elementID=course, week=week)
             message = createWeekSchedule(endpoint)
         else:
             message = "You haven't configured a course yet..."
@@ -244,7 +244,7 @@ def main():
         if course != 0:
             course = course['course']
             week = (date.today() + timedelta(7)).strftime('%Y-%m-%d')
-            endpoint = createURL(week=week)
+            endpoint = createURL(elementID=course, week=week)
             message = createWeekSchedule(endpoint)
         else:
             message = "You haven't configured a course yet..."
@@ -258,7 +258,7 @@ def main():
         if course != 0:
             course = course['course']
             week = (date.today() + timedelta(14)).strftime('%Y-%m-%d')
-            endpoint = createURL(week=week)
+            endpoint = createURL(elementID=course, week=week)
             message = createWeekSchedule(endpoint)
         else:
             message = "You haven't configured a course yet..."
