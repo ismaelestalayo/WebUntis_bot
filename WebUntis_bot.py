@@ -15,6 +15,7 @@ try:
         USERS = json.load(f)
 except Exception as ex:
     print("> Error reading token.txt or users.txt file \n", ex)
+
 MY_ID = 150853329
 
 HEADERS = {
@@ -45,6 +46,10 @@ COURSES = {
     '306-2º-16 Master Teleco': '5851',
 }
 
+def update_users(users):
+    USERS = users
+
+
 bot = telebot.TeleBot(TOKEN)
 
 # Outputs the incoming messages in the console
@@ -53,7 +58,6 @@ def listener(messages):
         if (m.content_type == 'text') and m.chat.first_name:
             # print the sent message to the console
             print("   >" + m.chat.first_name + " [" + str(m.chat.id) + "]: " + m.text)
-
             if(m.chat.id != MY_ID):
             	bot.send_message(MY_ID, "[" + m.chat.first_name + "]: " + m.text)
 
@@ -162,7 +166,7 @@ def createWeekSchedule(endpoint, verbose=False):
 
 # #############################################################################
 def main():
-    bot = telebot.TeleBot(TOKEN)
+    # bot = telebot.TeleBot(TOKEN)
     bot.set_update_listener(listener)  # register listener
 
 
@@ -262,7 +266,8 @@ def main():
         
         try:
             course = int(m.text.split(" ")[1])
-            USERS[cid] = {'course': course, 'name': m.chat.first_name}
+            USERS[str(cid)] = {'course': course, 'name': m.chat.first_name}
+            update_users(USERS)
             file_object = open('users.txt', 'w')
             json.dump(USERS, file_object)
             log = 'new user %s configured on %s' % (m.chat.first_name, course)
@@ -282,7 +287,6 @@ def main():
     def command_404(m):
         cid = m.chat.id
         print(USERS)
-        print(USERS[150853329])
         message = "Ooopsie woopsies, that command does not exist!"
         bot.send_message(cid, message)
         
