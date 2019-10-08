@@ -18,6 +18,10 @@ except Exception as ex:
 
 MY_ID = 150853329
 
+DAYS = ['NULL', 'Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sabado', 'Domingo']
+MONTHS = ['NULL', 'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct',
+         'Nov', 'Dic']
+
 HEADERS = {
     'Accept': 'application/json',
     'Cookie': 'schoolname="_ZWh1"; schoolname="_ZWh1"; JSESSIONID=851928A91F077D9F60EDA49243EDD9FB; ObGAURCookie=blEjfmYSeSPz4hqbjzhjEujaYNstepBrudLz9PQjfw4=',
@@ -89,8 +93,8 @@ def createDaySchedule(endpoint, day=date.today(), verbose=False):
         i = day.strftime('%Y%m%d')
         group = df.query('date==@i')
         year, month, day = str(i)[0:4], str(i)[4:6], str(i)[6:8]
-        weekDay = date(int(year), int(month), int(day)).strftime('%A')
-        month = calendar.month_name[int(month)][:3]
+        weekDay = DAYS[date(int(year), int(month), int(day)).weekday()]
+        month = MONTHS[int(month)]
         schedule += "%s %s %s (%s) \n" % (year, month, day, weekDay)
         schedule += ("———————————————————————\n")
         
@@ -136,8 +140,8 @@ def createWeekSchedule(endpoint, verbose=False):
             raise TypeError 
         for i, group in df.groupby(['date']):
             year, month, day = str(i)[0:4], str(i)[4:6], str(i)[6:8]
-            weekDay = date(int(year), int(month), int(day)).strftime('%A')
-            month = calendar.month_name[int(month)][:3]
+            weekDay = DAYS[date(int(year), int(month), int(day)).weekday()]
+            month = MONTHS[int(month)]
             schedule += "%s %s %s (%s) \n" % (year, month, day, weekDay)
             schedule += ("———————————————————————\n")
             
