@@ -5,16 +5,27 @@ import pandas as pd
 import json
 
 from datetime import date, timedelta
+from os import path
 
 # Author: Ismael Estalayo
 
 try:
     with open('token.txt', 'r') as f:
         TOKEN = f.read()
+except Exception as ex:
+    print("> token.txt file not found... \n", ex)
+    exit(1)
+
+
+if path.exists('users.txt'):
     with open('users.txt', 'r') as f:
         USERS = json.load(f)
-except Exception as ex:
-    print("> Error reading token.txt or users.txt file \n", ex)
+else:
+    print("> users.txt file not found. Creating one... \n")
+    with open('users.txt', 'w') as f:
+        f.write("{}")
+    USERS = {}
+
 
 MY_ID = 150853329
 
